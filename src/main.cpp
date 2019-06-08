@@ -18,24 +18,20 @@ void updateSignalRange(int8_t signal) {
 
 static void ICACHE_FLASH_ATTR sniffer_callback(uint8_t *buffer, uint16_t length) {
   struct SnifferPacket *snifferPacket = (struct SnifferPacket*) buffer;
-  // showMetadata(snifferPacket);
-  Serial.print("<");
   setLEDs(snifferPacket);
 }
 
 void setupLeds() {
-  delay(3000);
+  delay(10);
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness(  BRIGHTNESS );
-  //FastLED.setMaxRefreshRate(120);
+  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.setMaxRefreshRate(MAX_LED_REFRESH_RATE);
 
   currentPalette = RainbowColors_p;
   currentBlending = LINEARBLEND;
 }
 
 static void setLEDs(SnifferPacket *snifferPacket) {
-  // leds[mod8(snifferPacket->data[0] % NUM_LEDS)] =
-
   uint8_t simplified_mac_first_3 =
     (
      snifferPacket->data[10] ^
@@ -56,11 +52,7 @@ static void setLEDs(SnifferPacket *snifferPacket) {
   int8_t signal = snifferPacket->rx_ctrl.rssi;;
   updateSignalRange(signal);
 
-  // int8_t scaledSignal = ((signal - minSignal) / (maxSignal - minSignal)) * 255;
-
   uint8_t scaledSignal = map(minSignal, maxSignal, 10, 255, signal);
-  //uint8_t scaledSignal = 100;
-
   nblend(
          targetLeds[led_num],
          CHSV(simplified_mac_first_3, 220, scaledSignal),
@@ -83,38 +75,30 @@ static void sinLEDs() {
     uint8_t value = sinFunc(loopNum + i * 4) / 10;
     if(!(leds[i].r == 0 && leds[i].g == 0 && leds[i].b == 0)) {
       nblend(leds[i], CRGB(value, value, value), 9);
-
     }
   }
 }
 
-static void updateLEDs() {
+static void fadeLEDs() {
+  if (loopNum % 3 == 0) {
+    fadeUsingColor(targetLeds, NUM_LEDS, CRGB(200, 245, 254));
+  }
+}
+
+static void blendInTargetLeds() {
   for(uint8_t i = 0; i < NUM_LEDS; i++) {
     naddColor(&leds[i], &targetLeds[i]);
   }
+}
 
+static void updateLEDs() {
+  blendInTargetLeds();
   sinLEDs();
   fadeLEDs();
 
   FastLED.show();
 }
 
-#define FADE_LEDS_INTERVAL_MS 10
-static os_timer_t fadeLEDs_timer;
-
-
-void fadeLEDs() {
-  if (loopNum % 3 == 0) {
-    fadeUsingColor(targetLeds, NUM_LEDS, CRGB(200, 245, 254));
-  }
-
-  if (loopNum % 17 == 0) {
-    // fadeUsingColor(leds, NUM_LEDS, CRGB(210, 253, 254));
-    //blur1d(leds, NUM_LEDS, 10);
-  }
-
-  // Serial.print("v");
-}
 
 void setupChannelHoppingTimer() {
   // setup the channel hoping callback timer
@@ -123,15 +107,19 @@ void setupChannelHoppingTimer() {
   os_timer_arm(&channelHop_timer, CHANNEL_HOP_INTERVAL_MS, 1);
 }
 
+#define BUTTON_PIN 0
+
+void setupButton() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println("wifi-sniff started");
   setupLeds();
+  setupButton();
   setupSniffer(&sniffer_callback);
 
-  // os_timer_disarm(&fadeLEDs_timer);
-  // os_timer_setfn(&fadeLEDs_timer, (os_timer_func_t *) fadeLEDs, NULL);
-  // os_timer_arm(&fadeLEDs_timer, FADE_LEDS_INTERVAL_MS, 1);
   Serial.println("setup done");
 }
 
@@ -154,18 +142,30 @@ void introAnimationUpdateLEDs() {
   colorIndex += 1;
 }
 
+bool isButtonPressed() {
+  return digitalRead(BUTTON_PIN) == LOW;
+}
+
+uint8_t brightness = BRIGHTNESS;
+
 void loop() {
   loopNum += 1;
   FastLED.delay(1);
 
-  if (introAnimationMode == 0) {
-    updateLEDs();
+  if (isButtonPressed()) {
+    brightness += 1;
+    FastLED.setBrightness(brightness);
+    introAnimationUpdateLEDs();
   } else {
-    if (millis() > 6000) {
-      introAnimationMode = 0;
-      Serial.println("end intro animation");
+    if (introAnimationMode == 0) {
+      updateLEDs();
     } else {
-      introAnimationUpdateLEDs();
+      if (millis() > 4000) {
+        introAnimationMode = 0;
+        Serial.println("end intro animation");
+      } else {
+        introAnimationUpdateLEDs();
+      }
     }
   }
 }

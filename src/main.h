@@ -6,14 +6,13 @@
 #define NUM_LEDS 8
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
-#define BRIGHTNESS 170
+#define BRIGHTNESS 120
+#define MAX_LED_REFRESH_RATE 120
 
 CRGB leds[NUM_LEDS];
 CRGB targetLeds[NUM_LEDS];
 CRGBPalette16 currentPalette;
 TBlendType    currentBlending;
-
-void fadeLEDs();
 
 static void showMetadata(SnifferPacket *snifferPacket);
 static void setLEDs(SnifferPacket *snifferPacket);
