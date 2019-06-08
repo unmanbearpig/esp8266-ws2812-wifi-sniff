@@ -1,0 +1,32 @@
+* ESP-WiFi-LEDs
+  Shines pretty lights based on WiFi traffic around the device.
+
+  Shows a rainbow animation on startup.
+
+** TODO Improvements
+*** TODO Control brightness?
+*** TODO Add channel selector
+**** Use LEDs to show selected channel
+**** Add channel hopping mode
+*** TODO Lower the brightness of old devices, so the new ones flash brightly
+*** TODO Signal level doesn't affect brightness as much as I'd like
+*** Use destination MAC as well
+*** MACs
+**** TODO Make sure the color is actually based on manufacturer MACs
+**** TODO Make it so similar manufacturer MACs have similar color
+*** TODO Different modes
+**** Color based on type of device (base station, client, something else?)
+**** Color based on type of packet
+*** Hardware
+**** Power
+     At 8 WS2812 LEDs
+     and 5V (to power LEDs)
+     80-150 mA, average probably around 100-110
+**** TODO Add brightness dial?
+**** TODO Make it smaller
+**** TODO Make a case for it
+***** Requirements
+****** Has to have a light diffuser
+****** Openable to change/replace things
+****** USB plug?
+**** TODO Power via battery, USB, or both?
