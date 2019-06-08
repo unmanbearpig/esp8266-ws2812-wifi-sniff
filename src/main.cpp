@@ -88,9 +88,6 @@ static void sinLEDs() {
   }
 }
 
-// for some reason it doesn't send WS2812 data over pin 0
-// try it without wifi?
-
 static void updateLEDs() {
   for(uint8_t i = 0; i < NUM_LEDS; i++) {
     naddColor(&leds[i], &targetLeds[i]);
