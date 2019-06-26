@@ -1,7 +1,17 @@
-* ESP-WiFi-LEDs
-  Shines pretty lights based on WiFi traffic around the device.
-
+** ESP-WiFi-LEDs
+  Work in progress.
+  
+  A device that shines pretty RGB lights based on WiFi traffic around it.
   Shows a rainbow animation on startup.
+
+  [Here is a video](https://raw.githubusercontent.com/unmanbearpig/esp8266-ws2812-wifi-sniff/master/amazing.mov)
+
+  Hardware needed:
+  - An ESP8266 dev board. I've used ESP-01. Because I could get it locally for cheap, but something like NodeMCU or D1 Mini must be easier to work with if you can spare some physical space.
+  - Some WS2812 LEDs, don't forget to specify the number of them in the source code. I use 8 by default.
+  - Logic level converter to make them talk to each other. WS2812 kinda sorta work at 3.3 work but they are so flickery at that voltage that you better power them from 5V and use a level converter.
+  - 3.3V regulator
+
 
 ** TODO Improvements
 *** TODO Control brightness?
@@ -30,3 +40,5 @@
 ****** Openable to change/replace things
 ****** USB plug?
 **** TODO Power via battery, USB, or both?
+** TODO Challenge
+   Find a spot without a single WiFi device. 
